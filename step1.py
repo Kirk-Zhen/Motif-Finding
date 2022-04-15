@@ -1,4 +1,3 @@
-from urllib.request import proxy_bypass
 import numpy as np
 
 
