@@ -1,5 +1,5 @@
 import numpy as np
-
+import os
 
 def single_random_seq(SL):
     """
@@ -104,22 +104,50 @@ def write_ML(ML, DIR = './sample_data/', file = 'motiflength.txt'):
         f.close()
         
 
+def generate_data(ICPC,ML,SL,SC, motif_idx):
+    DIR = DIR = f"./data/dataset{motif_idx}/"
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
+    # 2
+    seqs = multi_random_seq(SL, SC)
+    # 3
+    PWM = generate_PWM(ML, ICPC)
+    # 4
+    mtfs = generate_binding_sites(PWM, SC)
+    # 5, 7
+    new_seqs = plant_site(seqs, mtfs, DIR=DIR)
+    # 6
+    write_to_FASTA(new_seqs, DIR=DIR)
+    # 8
+    write_motif(PWM, motif_idx, DIR=DIR)
+    # 9
+    write_ML(ML, DIR=DIR)
+    
 
 
 
 if __name__ == "__main__":
-    ICPC = 1.5
+    ICPC = 2
     ML = 8
-    SL = 20
+    SL = 500
     SC = 10
     motif_idx = 0
 
+    for _ in range(10):
+        motif_idx+=1
+        generate_data(ICPC, ML, SL, SC, motif_idx)
 
-    seqs = multi_random_seq(SL, SC)
-    PWM = generate_PWM(ML, ICPC)
-    mtfs = generate_binding_sites(PWM, SC)
-    new_seqs = plant_site(seqs, mtfs)
-    write_to_FASTA(new_seqs)
-    write_ML(ML)
-    write_motif(PWM, motif_idx)
+    for par in [1, 1.5]:
+        for _ in range(10):
+            motif_idx += 1
+            generate_data(par, ML, SL, SC, motif_idx)
+    
+    for par in [6, 7]:
+        for _ in range(10):
+            motif_idx += 1
+            generate_data(ICPC, par, SL, SC, motif_idx)
 
+    for par in [5, 20]:
+        for _ in range(10):
+            motif_idx += 1
+            generate_data(ICPC, ML, SL, par, motif_idx)
