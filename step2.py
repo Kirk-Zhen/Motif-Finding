@@ -39,27 +39,33 @@ def get_PWM(sites):
 
 
 def get_scores(PWM, sub_seqs):
+    # warning: taking log on 0
     scores = [sum(np.log(PWM[i][dic[c]]) for i, c in enumerate(sub_seq)) for sub_seq in sub_seqs]
     return scores
 
 
 def gibbs(seqs, ML):
+    # generate the inital INDEX for site of each sequence
     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
     prev = None
     cnt = 0
     while INDEX != prev: 
         cnt += 1
-        if cnt >= 100: break # break if over 100 rounds.
+        if cnt >= 100: break # break if over loop over 100 iteration 
+
         prev = INDEX[:]
         for i, seq in enumerate(seqs):
             # compute PWM using all sequence except the current sequence
             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
+
             # find the optimal binding sites in the current sequence
+            # get all sub-sequence of length ML of the current sequence
             sub_seqs = [seq[idx : idx + ML] for idx in range(len(seq) - ML + 1)]
+            # calculate score for each sub-sequecne
             scores = get_scores(PWM, sub_seqs)
+            # take the one with highest score as the new optimal index
             optimal_idx = np.argmax(scores)
             INDEX[i] = optimal_idx
-    # print(cnt)
     return INDEX, get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
 
 
