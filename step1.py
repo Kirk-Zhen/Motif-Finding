@@ -1,6 +1,9 @@
 import numpy as np
 import os
 
+
+
+
 def single_random_seq(SL):
     """
     Generate one random sequence with length SL.
@@ -42,9 +45,6 @@ def PWM_to_motif(PWM):
     return ''.join([dic[i] for i in idx])
 
 
-
-
-
 # 4
 def generate_binding_sites(PWM, SC):
     """Generate SC binding sites"""
@@ -61,6 +61,7 @@ def plant_site_single(seq, site):
     site_length = len(site)
     idx = np.random.randint(0, len(seq)-site_length+1)
     return idx, seq[:idx]+site+seq[idx+site_length:]
+
 
 def plant_site(seqs, sites, DIR = './sample_data/', file = 'sites.txt'):
     """
