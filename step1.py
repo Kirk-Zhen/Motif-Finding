@@ -3,6 +3,7 @@ import os
 
 
 
+dic = {"A":0, "C":1, "G":2, "T":3}
 
 def single_random_seq(SL):
     """

@@ -1,6 +1,7 @@
 import os
 import time
 import numpy as np
+from step2 import compute_total_IC
 
 def relative_entropy(p, q):
     # Scale p and q to [0, 1]
@@ -63,6 +64,15 @@ class Evaluator(object):
                 
         return overlap
         
+    def _get_ICPC_difference(self):
+        motif_file = os.path.join(self.path, "motif.txt")
+        predictedmotif_file = os.path.join(self.path, "predictedmotif.txt")
+        motif = np.loadtxt(motif_file, dtype=float, skiprows=1)
+        predictedmotif = np.loadtxt(predictedmotif_file, dtype=float, skiprows=1)
+        icpc_motif = compute_total_IC(motif)/self.motif_length
+        icpc_predictedmotif = compute_total_IC(predictedmotif)/self.motif_length
+        return icpc_motif, icpc_predictedmotif
+
     def set_start_time(self):
         self._start_time = time.time()
         
@@ -75,6 +85,8 @@ class Evaluator(object):
 
         return running_time
     
+
+
     def evaluate(self, dataset_path):
         self.path = dataset_path
         self._get_motif_length()
@@ -82,6 +94,7 @@ class Evaluator(object):
         motif_loss = self._motif_loss()
         # overlap
         site_loss = self._sites_loss()
+        icpc_motif, icpc_predictedmotif = self._get_ICPC_difference()
         
-        return motif_loss, site_loss
+        return motif_loss, site_loss, icpc_motif, icpc_predictedmotif
         

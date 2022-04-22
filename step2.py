@@ -3,6 +3,7 @@ import numpy as np
 import os
 import math
 
+dic = {"A":0, "C":1, "G":2, "T":3}
 
 def predict_motif(PWM, DIR = './sample_data/', file = 'predictedmotif.txt'):
     ML = PWM.shape[0]
