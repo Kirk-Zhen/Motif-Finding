@@ -152,3 +152,12 @@ if __name__ == "__main__":
         for _ in range(10):
             motif_idx += 1
             generate_data(ICPC, ML, SL, par, motif_idx)
+
+    # DIR = DIR = f"./sample/"
+    # seqs = multi_random_seq(SL, SC)
+    # PWM = generate_PWM(ML, ICPC)
+    # mtfs = generate_binding_sites(PWM, SC)
+    # new_seqs = plant_site(seqs, mtfs, DIR=DIR)
+    # write_to_FASTA(new_seqs, DIR=DIR)
+    # write_motif(PWM, motif_idx, DIR=DIR)
+    # write_ML(ML, DIR=DIR)

@@ -85,4 +85,3 @@ class Evaluator(object):
         
         return motif_loss, site_loss
         
-        

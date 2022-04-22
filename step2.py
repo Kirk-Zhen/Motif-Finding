@@ -1,3 +1,4 @@
+import socketserver
 import numpy as np
 import os
 import math
@@ -38,10 +39,22 @@ def get_PWM(sites):
     return PWM
 
 
-def get_scores(PWM, sub_seqs):
-    # warning: taking log on 0
-    scores = [sum(np.log(PWM[i][dic[c]]) for i, c in enumerate(sub_seq)) for sub_seq in sub_seqs]
-    return scores
+
+def get_seq_ICs(PWM, sub_seqs):
+    m = PWM/0.25
+    log_m = np.log2(m, out=np.zeros_like(m), where=(m!=0))
+    IC_matrix = np.multiply(PWM, log_m)
+    # get the IC for each sub_seq, given the current PWM (theta(t) in the lecture)
+    ICs = [sum([IC_matrix[i][dic[c]] for i, c in enumerate(sub_seq)]) for sub_seq in sub_seqs]
+    return np.array(ICs)
+
+
+def compute_total_IC(PWM):
+    m = PWM/0.25
+    log_m = np.log2(m, out=np.zeros_like(m), where=(m!=0))
+    IC_matrix = np.multiply(PWM, log_m)
+    ICPCs = np.sum(IC_matrix)
+    return ICPCs
 
 
 def gibbs(seqs, ML):
@@ -49,39 +62,49 @@ def gibbs(seqs, ML):
     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
     prev = None
     cnt = 0
+    best_ic = 0
+    Best_index = None
     while INDEX != prev: 
         cnt += 1
         if cnt >= 100: break # break if over loop over 100 iteration 
-
         prev = INDEX[:]
         for i, seq in enumerate(seqs):
             # compute PWM using all sequence except the current sequence
             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
-
             # find the optimal binding sites in the current sequence
             # get all sub-sequence of length ML of the current sequence
             sub_seqs = [seq[idx : idx + ML] for idx in range(len(seq) - ML + 1)]
-            # calculate score for each sub-sequecne
-            scores = get_scores(PWM, sub_seqs)
-            # take the one with highest score as the new optimal index
-            optimal_idx = np.argmax(scores)
+            # calculate information content for each sub-sequecne
+            ICs = get_seq_ICs(PWM, sub_seqs) # shape: (493, )
+            # take the one with highest IC as the new optimal index
+            optimal_idx = np.argmax(ICs)
             INDEX[i] = optimal_idx
-    return INDEX, get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
+            temp_PWN = get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
+            cur_ic = compute_total_IC(temp_PWN)
+            if best_ic < cur_ic:
+                best_ic = cur_ic
+                Best_index = INDEX
+    return Best_index, get_PWM([x[j : j + ML] for x, j in zip(seqs, Best_index)])
+
 
 
 if __name__ == "__main__":
 
     dic = {"A":0, "C":1, "G":2, "T":3}
     for i in range(1,71):
+        print(f"Computing the {i}-th data")
         DIR = f"./data/dataset{i}/"
         seqs, ML = read_data(DIR=DIR)
         sites, PWM = gibbs(seqs, ML)
+        # total_IC = compute_ICPC(PWM)
+        # print(f"ICPC:{total_IC/ML}\n")
         predict_motif(PWM, DIR=DIR)
         predict_site(sites, DIR=DIR)
 
     # seqs, ML = read_data(DIR='./sample/')
     # sites, PWM = gibbs(seqs, ML)
     # print(sites)
-    # print(PWM)
+    # total_IC = compute_ICPC(PWM)
+    # print(total_IC)
     # predict_motif(PWM, DIR='./sample/')
     # predict_site(sites, DIR='./sample/')
