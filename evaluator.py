@@ -3,10 +3,10 @@ import time
 import numpy as np
 from step2 import compute_total_IC
 
-def relative_entropy(p, q):
+def relative_entropy(p, q, esp=0.00001):
     # Scale p and q to [0, 1]
-    p = p / np.linalg.norm(p)
-    q = q / np.linalg.norm(q)
+    p = p / np.linalg.norm(p) + esp
+    q = q / np.linalg.norm(q) + esp
     rn = 0
     for i in range(len(p)):
         if p[i] != 0 and q[i] != 0:
@@ -85,8 +85,6 @@ class Evaluator(object):
 
         return running_time
     
-
-
     def evaluate(self, dataset_path):
         self.path = dataset_path
         self._get_motif_length()

@@ -107,7 +107,7 @@ def write_ML(ML, DIR = './sample_data/', file = 'motiflength.txt'):
         
 
 def generate_data(ICPC,ML,SL,SC, motif_idx):
-    DIR = DIR = f"./data/dataset{motif_idx}/"
+    DIR = DIR = f"./data_icpc/dataset{motif_idx}/"
     if not os.path.exists(DIR):
         os.makedirs(DIR)
     # 2
@@ -135,24 +135,24 @@ if __name__ == "__main__":
     SC = 10
     motif_idx = 0
 
-    for _ in range(10):
-        motif_idx+=1
-        generate_data(ICPC, ML, SL, SC, motif_idx)
+    # for _ in range(10):
+    #     motif_idx+=1
+    #     generate_data(ICPC, ML, SL, SC, motif_idx)
 
-    for par in [1, 1.5]:
-        for _ in range(10):
+    for par in [1, 1.5, 2]:
+        for _ in range(50):
             motif_idx += 1
             generate_data(par, ML, SL, SC, motif_idx)
     
-    for par in [6, 7]:
-        for _ in range(10):
-            motif_idx += 1
-            generate_data(ICPC, par, SL, SC, motif_idx)
+    # for par in [6, 7]:
+    #     for _ in range(10):
+    #         motif_idx += 1
+    #         generate_data(ICPC, par, SL, SC, motif_idx)
 
-    for par in [5, 20]:
-        for _ in range(10):
-            motif_idx += 1
-            generate_data(ICPC, ML, SL, par, motif_idx)
+    # for par in [5, 20]:
+    #     for _ in range(10):
+    #         motif_idx += 1
+    #         generate_data(ICPC, ML, SL, par, motif_idx)
 
     # DIR = DIR = f"./sample/"
     # seqs = multi_random_seq(SL, SC)
