@@ -2,6 +2,8 @@ import socketserver
 import numpy as np
 import os
 import math
+import argparse
+
 
 dic = {"A":0, "C":1, "G":2, "T":3}
 
@@ -88,24 +90,103 @@ def gibbs(seqs, ML):
     return Best_index, get_PWM([x[j : j + ML] for x, j in zip(seqs, Best_index)])
 
 
+def get_QxPx(PWM, sub_seqs):
+    m = PWM/0.25
+    prods = [np.prod([m[i][dic[c]] for i, c in enumerate(sub_seq)])  for sub_seq in sub_seqs]
+    return np.array(prods)
 
-if __name__ == "__main__":
 
+def gibbs_version2(seqs, ML):
+    # generate the inital INDEX for site of each sequence
+    INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
+    prev = None
+    cnt = 0
+    best_ic = 0
+    Best_index = None
+    while INDEX != prev: 
+        cnt += 1
+        if cnt >= 100: break # break if over loop over 100 iteration 
+        prev = INDEX[:]
+        for i, seq in enumerate(seqs):
+            # compute PWM using all sequence except the current sequence
+            PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
+            # find the optimal binding sites in the current sequence
+            # get all sub-sequence of length ML of the current sequence
+            sub_seqs = [seq[idx : idx + ML] for idx in range(len(seq) - ML + 1)]
+            # calculate information content for each sub-sequecne
+            QxPx = get_QxPx(PWM, sub_seqs) # shape: (493, )
+            if all(v == 0 for v in QxPx): continue
+            # take the one with highest IC as the new optimal index
+            # Select a idx according to the value of Qx/Px
+            chosen_idx = np.random.choice([idx for idx in range(len(seq)-ML+1)], p=QxPx/QxPx.sum(), size=1)
+            INDEX[i] = chosen_idx[0]
+            temp_PWN = get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
+            cur_ic = compute_total_IC(temp_PWN)
+            if best_ic < cur_ic:
+                best_ic = cur_ic
+                Best_index = INDEX
+    return Best_index, get_PWM([x[j : j + ML] for x, j in zip(seqs, Best_index)])
+
+
+
+
+# def gibbs_edit_version(seqs, ML):
+#     # generate the inital INDEX for site of each sequence
+#     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
+#     prev = None
+#     cnt = 0
+#     while INDEX != prev: 
+#         cnt += 1
+#         if cnt >= 100: break # break if over loop over 100 iteration 
+
+#         prev = INDEX[:]
+#         for i, seq in enumerate(seqs):
+#             # compute PWM using all sequence except the current sequence
+#             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
+
+#             # find the optimal binding sites in the current sequence
+#             # get all sub-sequence of length ML of the current sequence
+#             sub_seqs = [seq[idx : idx + ML] for idx in range(len(seq) - ML + 1)]
+#             # calculate score for each sub-sequecne
+#             scores = get_scores(PWM, sub_seqs)
+#             # take the one with highest score as the new optimal index
+#             optimal_idx = np.argmax(scores)
+#             INDEX[i] = optimal_idx
+#     return INDEX, get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
+
+
+def main(args):
     dic = {"A":0, "C":1, "G":2, "T":3}
-    for i in range(1,71):
+
+    if args.method == "gibbs":
+        method = gibbs
+    else:
+        method = gibbs_version2
+
+    n_data = args.n_data
+    folder = "data"
+    for i in range(1, n_data * 7 + 1):
         print(f"Computing the {i}-th data")
-        DIR = f"./data/dataset{i}/"
+        DIR = f"./{folder}/dataset{i}/"
         seqs, ML = read_data(DIR=DIR)
-        sites, PWM = gibbs(seqs, ML)
+        sites, PWM = method(seqs, ML)
         # total_IC = compute_ICPC(PWM)
         # print(f"ICPC:{total_IC/ML}\n")
         predict_motif(PWM, DIR=DIR)
         predict_site(sites, DIR=DIR)
 
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(description='Motif-Finding')
+    arg_parser.add_argument('--method', type=str, default="gibbs", help="method to use")
+    arg_parser.add_argument('--n_data', type=int, default=10, help="number of data for each parameter combination")
+    args = arg_parser.parse_args()
+    main(args)
+
+
     # seqs, ML = read_data(DIR='./sample/')
-    # sites, PWM = gibbs(seqs, ML)
+    # sites, PWM = gibbs_version2(seqs, ML)
     # print(sites)
-    # total_IC = compute_ICPC(PWM)
+    # total_IC = compute_total_IC(PWM)
     # print(total_IC)
     # predict_motif(PWM, DIR='./sample/')
     # predict_site(sites, DIR='./sample/')

@@ -1,6 +1,6 @@
 import numpy as np
 import os
-
+import argparse
 
 
 dic = {"A":0, "C":1, "G":2, "T":3}
@@ -84,7 +84,6 @@ def plant_site(seqs, sites, DIR = './sample_data/', file = 'sites.txt'):
 
     return new_seqs
 
-
 # 6
 def write_to_FASTA(seqs, DIR = './sample_data/', file = 'sequences.fa'):
     """
@@ -106,8 +105,8 @@ def write_ML(ML, DIR = './sample_data/', file = 'motiflength.txt'):
         f.close()
         
 
-def generate_data(ICPC,ML,SL,SC, motif_idx):
-    DIR = DIR = f"./data_icpc/dataset{motif_idx}/"
+def generate_data(ICPC,ML,SL,SC, folder, motif_idx):
+    DIR = f"./{folder}/dataset{motif_idx}/"
     if not os.path.exists(DIR):
         os.makedirs(DIR)
     # 2
@@ -126,33 +125,53 @@ def generate_data(ICPC,ML,SL,SC, motif_idx):
     write_ML(ML, DIR=DIR)
     
 
-
-
-if __name__ == "__main__":
+def main(args):
     ICPC = 2
     ML = 8
     SL = 500
     SC = 10
     motif_idx = 0
 
-    # for _ in range(10):
-    #     motif_idx+=1
-    #     generate_data(ICPC, ML, SL, SC, motif_idx)
+    n_data = args.n_data
+    folder = "data"
 
-    for par in [1, 1.5, 2]:
-        for _ in range(50):
+    if args.data_type == "enhanced":
+        folder = "data_icpc"
+        # for par in [1, 1.5, 2]:
+        #     for _ in range(50):
+        #         motif_idx += 1
+        #         generate_data(par, ML, SL, SC, folder, motif_idx)
+    elif args.data_type == "normal":
+        n_data = 10
+        folder = "data"
+
+    for _ in range(n_data):
+        motif_idx+=1
+        generate_data(ICPC, ML, SL, SC, folder, motif_idx)
+
+    for par in [1, 1.5]:
+        for _ in range(n_data):
             motif_idx += 1
-            generate_data(par, ML, SL, SC, motif_idx)
-    
-    # for par in [6, 7]:
-    #     for _ in range(10):
-    #         motif_idx += 1
-    #         generate_data(ICPC, par, SL, SC, motif_idx)
+            generate_data(par, ML, SL, SC, folder, motif_idx)
 
-    # for par in [5, 20]:
-    #     for _ in range(10):
-    #         motif_idx += 1
-    #         generate_data(ICPC, ML, SL, par, motif_idx)
+    for par in [6, 7]:
+        for _ in range(n_data):
+            motif_idx += 1
+            generate_data(ICPC, par, SL, SC,folder,  motif_idx)
+
+    for par in [5, 20]:
+        for _ in range(n_data):
+            motif_idx += 1
+            generate_data(ICPC, ML, SL, par, folder, motif_idx)
+
+
+
+if __name__ == "__main__":
+    arg_parser = argparse.ArgumentParser(description='Data Generation')
+    arg_parser.add_argument('--data_type', type=str, default="normal", help="'normal': reqirement in step 1; 'enhanced': larger number of data as defined in n_data")
+    arg_parser.add_argument('--n_data', type=int, default=10, help="number of data for each parameter combination")
+    args = arg_parser.parse_args()
+    main(args)
 
     # DIR = DIR = f"./sample/"
     # seqs = multi_random_seq(SL, SC)
