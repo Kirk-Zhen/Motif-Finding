@@ -135,16 +135,6 @@ def main(args):
     n_data = args.n_data
     folder = "data"
 
-    if args.data_type == "enhanced":
-        folder = "data_icpc"
-        # for par in [1, 1.5, 2]:
-        #     for _ in range(50):
-        #         motif_idx += 1
-        #         generate_data(par, ML, SL, SC, folder, motif_idx)
-    elif args.data_type == "normal":
-        n_data = 10
-        folder = "data"
-
     for _ in range(n_data):
         motif_idx+=1
         generate_data(ICPC, ML, SL, SC, folder, motif_idx)
@@ -168,7 +158,7 @@ def main(args):
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description='Data Generation')
-    arg_parser.add_argument('--data_type', type=str, default="normal", help="'normal': reqirement in step 1; 'enhanced': larger number of data as defined in n_data")
+    # arg_parser.add_argument('--data_type', type=str, default="normal", help="'normal': reqirement in step 1; 'enhanced': larger number of data as defined in n_data")
     arg_parser.add_argument('--n_data', type=int, default=10, help="number of data for each parameter combination")
     args = arg_parser.parse_args()
     main(args)
