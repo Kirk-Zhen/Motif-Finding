@@ -45,7 +45,7 @@ python step2.py --n_data 10 --method gibbs
 
 ## Step 3: Evaluation
 
-Execute the following command to generate the graphs for performance evaluation.
+Execute the following command to generate the graphs for performance evaluation, graphs will be generated in the `graphs` folder.
 ```bash
 python step3.py --n_data 10 --method gibbs
 ```

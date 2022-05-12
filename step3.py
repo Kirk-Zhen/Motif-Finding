@@ -34,7 +34,7 @@ def plot_a_graph(keys, r_dic, e_dic, o_dic, labels, fn):
     plt.subplot(1, 3, 3)
     plt.boxplot([r_dic[keys[0]], r_dic[keys[1]], r_dic[keys[2]]], labels=labels)
     plt.title("run times")
-    plt.savefig(fn)
+    plt.savefig(f"./graphs/{fn}")
 
 
 def plot_graphs(run_time_dict, entropy_dict, overlapped_dict):
