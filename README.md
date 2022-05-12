@@ -26,7 +26,9 @@ Execute the following command to generate data:
 python step1.py --n_data 10
 ```
 `n_data`: the number of data per parameter combination. 
+
 As is stated in the project requirement, `n_data = 10`.  
+
 Data will be generated in the `data` folder.
 
 
@@ -37,6 +39,7 @@ Execute the following command to run the Gibbs Sampling Algorithm for Motif Find
 python step2.py --n_data 10 --method gibbs
 ```
 `n_data`: <font color="red"> must be consistent with Step 1</font>. 
+
 `method`: parameter for the algorithm. `gibbs` for Gibbs Sampling Algorithm, `gibbs2` for a modified version of Gibbs Sampling Algorithm.
 
 
@@ -47,4 +50,5 @@ Execute the following command to generate the graphs for performance evaluation.
 python step3.py --n_data 10 --method gibbs
 ```
 `n_data`: <font color="red"> must be consistent with Step 1</font>. 
+
 `method`: parameter for the algorithm. `gibbs` for Gibbs Sampling Algorithm, `gibbs2` for a modified version of Gibbs Sampling Algorithm.
