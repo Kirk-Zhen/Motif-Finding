@@ -171,3 +171,18 @@ if __name__ == "__main__":
     # write_to_FASTA(new_seqs, DIR=DIR)
     # write_motif(PWM, motif_idx, DIR=DIR)
     # write_ML(ML, DIR=DIR)
+
+
+    # ICPC = 2
+    # ML = 8
+    # SL = 500
+    # SC = 100
+    # motif_idx = 0
+
+    # n_data = 20
+    # folder = "data_icpc"
+
+    # for par in [1, 1.5, 2]:
+    #     for _ in range(n_data):
+    #         motif_idx += 1
+    #         generate_data(par, ML, SL, SC,folder,  motif_idx)

@@ -1,3 +1,4 @@
+from cmath import inf
 import socketserver
 import numpy as np
 import os
@@ -49,6 +50,7 @@ def get_seq_ICs(PWM, sub_seqs):
     IC_matrix = np.multiply(PWM, log_m)
     # get the IC for each sub_seq, given the current PWM (theta(t) in the lecture)
     ICs = [sum([IC_matrix[i][dic[c]] for i, c in enumerate(sub_seq)]) for sub_seq in sub_seqs]
+    # print(IC_matrix)
     return np.array(ICs)
 
 
@@ -60,7 +62,7 @@ def compute_total_IC(PWM):
     return ICPCs
 
 
-def gibbs(seqs, ML):
+def gibbs_version2(seqs, ML):
     # generate the inital INDEX for site of each sequence
     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
     prev = None
@@ -69,9 +71,12 @@ def gibbs(seqs, ML):
     Best_index = None
     while INDEX != prev: 
         cnt += 1
-        if cnt >= 100: break # break if over loop over 100 iteration 
+        if cnt >= 20: break # break if over loop over 100 iteration 
         prev = INDEX[:]
         for i, seq in enumerate(seqs):
+        # lst = np.random.permutation(len(seqs))
+        # for i in lst:
+            seq = seqs[i]
             # compute PWM using all sequence except the current sequence
             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
             # find the optimal binding sites in the current sequence
@@ -92,22 +97,30 @@ def gibbs(seqs, ML):
 
 def get_QxPx(PWM, sub_seqs):
     m = PWM/0.25
+    # log_m = np.log2(PWM, out=np.zeros_like(PWM), where=(PWM!=0))
+    # log_m[log_m == 0] = -inf
     prods = [np.prod([m[i][dic[c]] for i, c in enumerate(sub_seq)])  for sub_seq in sub_seqs]
+    # pdd = [np.sum([log_m[i][dic[c]] for i, c in enumerate(sub_seq)]) for sub_seq in sub_seqs]
+    # print(np.array(pdd).shape)
     return np.array(prods)
 
 
-def gibbs_version2(seqs, ML):
+def gibbs(seqs, ML):
     # generate the inital INDEX for site of each sequence
     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
     prev = None
     cnt = 0
     best_ic = 0
     Best_index = None
-    while INDEX != prev: 
+    # while INDEX != prev: 
+    while True:
         cnt += 1
-        if cnt >= 100: break # break if over loop over 100 iteration 
+        if cnt >= 20: break # break if over loop over 100 iteration 
         prev = INDEX[:]
-        for i, seq in enumerate(seqs):
+        # for i, seq in enumerate(seqs):
+        lst = np.random.permutation(len(seqs))
+        for i in lst:
+            seq = seqs[i]
             # compute PWM using all sequence except the current sequence
             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
             # find the optimal binding sites in the current sequence
@@ -129,38 +142,12 @@ def gibbs_version2(seqs, ML):
 
 
 
-
-# def gibbs_edit_version(seqs, ML):
-#     # generate the inital INDEX for site of each sequence
-#     INDEX = [np.random.randint(0, len(seq) - ML + 1) for seq in seqs]
-#     prev = None
-#     cnt = 0
-#     while INDEX != prev: 
-#         cnt += 1
-#         if cnt >= 100: break # break if over loop over 100 iteration 
-
-#         prev = INDEX[:]
-#         for i, seq in enumerate(seqs):
-#             # compute PWM using all sequence except the current sequence
-#             PWM = get_PWM([s[idx : idx + ML] for j, (s, idx) in enumerate(zip(seqs, INDEX)) if j != i])
-
-#             # find the optimal binding sites in the current sequence
-#             # get all sub-sequence of length ML of the current sequence
-#             sub_seqs = [seq[idx : idx + ML] for idx in range(len(seq) - ML + 1)]
-#             # calculate score for each sub-sequecne
-#             scores = get_scores(PWM, sub_seqs)
-#             # take the one with highest score as the new optimal index
-#             optimal_idx = np.argmax(scores)
-#             INDEX[i] = optimal_idx
-#     return INDEX, get_PWM([x[j : j + ML] for x, j in zip(seqs, INDEX)])
-
-
 def main(args):
     dic = {"A":0, "C":1, "G":2, "T":3}
 
-    if args.method == "gibbs":
-        method = gibbs
-    else:
+
+    method = gibbs
+    if args.method == "mod_gibbs":
         method = gibbs_version2
 
     n_data = args.n_data

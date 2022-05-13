@@ -47,22 +47,25 @@ class Evaluator(object):
         predictedsites_file = os.path.join(self.path, "predictedsites.txt")
         sites = np.loadtxt(sites_file, dtype=int)
         predictedsites = np.loadtxt(predictedsites_file, dtype=int)
-        # record all motif position in sites
+
         sites_list = []
         for site in sites:
-            for i in range(self.motif_length):
-                sites_list.append(site+i)
-        # record all motif position in predicted sites
+            cur_site = [site+i for i in range(self.motif_length)]
+            sites_list.append(cur_site)
+
         predictedsites_list = []
         for psite in predictedsites:
-            for i in range(self.motif_length):
-                predictedsites_list.append(psite+i)
+            cur_site = [psite+i for i in range(self.motif_length)]
+            predictedsites_list.append(cur_site)
+
         overlap = 0
-        for site in predictedsites_list:
-            if site in sites_list:
-                overlap += 1
-                
-        return overlap
+        for ori_site, pred_site in zip(sites_list, predictedsites_list):
+            # print(ori_site, pred_site)
+            for s in pred_site:
+                if s in ori_site:
+                    overlap += 1
+        return overlap/len(sites)
+        
         
     def _get_ICPC_difference(self):
         motif_file = os.path.join(self.path, "motif.txt")
